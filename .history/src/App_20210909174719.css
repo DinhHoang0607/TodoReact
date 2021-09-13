@@ -1,0 +1,16 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+body {
+  font-size: 62.5%;
+  width: 100%;
+  height: 100vh;
+}
+h1 {
+  font-size: 5rem;
+  margin: 0 auto;
+}
