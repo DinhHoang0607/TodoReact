@@ -1,36 +1,15 @@
-# Build docker image.
-# Sử dung node
-FROM node:16 as node
+FROM jenkins/jenkins:2.289.3-lts-jdk11
 
-# Khai báo tham số
-ARG workdir=.
-LABEL description="deploy react app"
+USER root
 
-# Khái báo workdir trong node.
-WORKDIR /app
+RUN apt-get update && apt-get install -y apt-transport-https \
+  ca-certificates curl gnupg2 \
+  software-properties-common
+RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
+RUN apt-key fingerprint 0EBFCD88
+RUN add-apt-repository \
+  "deb [arch=amd64] https://download.docker.com/linux/debian \
+  $(lsb_release -cs) stable"
+RUN apt-get update && apt-get install -y docker-ce-cli
 
-# Copy project vào trong workdir của node.
-COPY ${workdir}/ /app/
-
-# Cài đặt các thư viện node liên quan.
-# RUN npm install
-
-# Chạy lệnh build.
-RUN npm run build
-
-# Sử dụng nginx
-FROM tomcat:jdk11
-# Copy folder đã được build vào folder chạy của nginx.
-COPY --from=node /app/build/ /usr/local/tomcat/webapps/ROOT/
-
-# Copy file cấu hình chạy cho nginx (file nginx.conf sẽ tạo ở bước tiếp theo)
-# COPY --from=node /app/nginx.conf /etc/nginx/nginx.conf
-
-# Cài đặt curl cho câu lệnh check HEALTH
-# RUN apt-get update && apt-get install -y curl
-
-# Kiểm tra trạng thái của container sau khi chạy
-HEALTHCHECK --interval=1m --timeout=3s \
-  CMD curl -f http://localhost || exit 1
-
-CMD ["nginx", "-g", "daemon off;"]
+USER jenkins
